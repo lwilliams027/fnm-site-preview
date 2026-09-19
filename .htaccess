@@ -1,0 +1,25 @@
+# Face & Mane — temporary static hosting (cPanel / Apache)
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # --- Force HTTPS ---
+  # Leave commented until AutoSSL is active in cPanel, then uncomment.
+  # RewriteCond %{HTTPS} !=on
+  # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # --- SPA fallback ---
+  # Serve index.html for any path that isn't a real file or folder, so
+  # client-side routes (e.g. /providers) work on refresh / direct link.
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Always serve the freshest entry point + service worker so the client
+# isn't stuck on a cached old build after we push an update.
+<IfModule mod_headers.c>
+  <FilesMatch "(index\.html|sw\.js|registerSW\.js|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+</IfModule>

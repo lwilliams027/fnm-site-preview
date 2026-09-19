@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clearing cached files…</title>
+    <style>
+      body{font-family:system-ui,sans-serif;background:#F6F2EA;color:#2B2B28;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;text-align:center}
+      .box{max-width:480px}
+      h1{font-size:22px;margin:0 0 8px}
+      p{margin:8px 0;color:#787872}
+      .ok{color:#0F6E56}
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <h1>Clearing cached files…</h1>
+      <p id="status">Unregistering service workers and emptying browser caches.</p>
+      <p><small>Redirecting back to the site in a moment.</small></p>
+    </div>
+    <script>
+      (async function () {
+        var status = document.getElementById('status');
+        try {
+          if ('serviceWorker' in navigator) {
+            var regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(function (r) { return r.unregister(); }));
+          }
+          if (window.caches && caches.keys) {
+            var keys = await caches.keys();
+            await Promise.all(keys.map(function (k) { return caches.delete(k); }));
+          }
+          status.innerHTML = '<span class="ok">Done.</span> Redirecting…';
+        } catch (e) {
+          status.textContent = 'Cleanup attempted. Redirecting…';
+        }
+        setTimeout(function () { location.href = '/?_=' + Date.now(); }, 1200);
+      })();
+    </script>
+  </body>
+</html>
